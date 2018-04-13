@@ -164,7 +164,7 @@ class DiagnosticsProvider extends AbstractSupport {
 
     private _onDidChangeActiveTextEditor(textEditor: vscode.TextEditor): void {
         // active text editor can be undefined.
-        if (textEditor != undefined) { 
+        if (textEditor != undefined && textEditor.document != null) { 
             this._onDocumentAddOrChange(textEditor.document);
         }
     }
