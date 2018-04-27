@@ -92,7 +92,7 @@ export function getUnresolvedDependenices(fileName: string): OmnisharpServerUnre
 export function getFakeVsCode(): vscode.vscode {
     return {
         commands: {
-            executeCommand: <T>(command: string, ...rest: any[]) => {
+            executeCommand: (command: string, ...rest: any[]) => {
                 throw new Error("Not Implemented");
             }
         },

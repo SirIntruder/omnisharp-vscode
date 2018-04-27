@@ -70,7 +70,7 @@ suite("InformationMessageObserver", () => {
                 vscode.workspace.getConfiguration = (section?: string, resource?: Uri) => {
                     return {
                         ...getNullWorkspaceConfiguration(),
-                        get: <T>(section: string) => {
+                        get: (section: string) => {
                             return true;// suppress the restore information
                         }
                     };
@@ -88,7 +88,7 @@ suite("InformationMessageObserver", () => {
                 vscode.workspace.getConfiguration = (section?: string, resource?: Uri) => {
                     return {
                         ...getNullWorkspaceConfiguration(),
-                        get: <T>(section: string) => {
+                        get: (section: string) => {
                             return false; // do not suppress the restore info
                         }
                     };
