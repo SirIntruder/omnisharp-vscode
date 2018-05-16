@@ -872,6 +872,19 @@ export interface FileSystemWatcher extends Disposable {
     onDidDelete: Event<Uri>;
 }
 
+export interface ConfigurationChangeEvent {
+
+    /**
+     * Returns `true` if the given section for the given resource (if provided) is affected.
+     *
+     * @param section Configuration name, supports _dotted_ names.
+     * @param resource A resource Uri.
+     * @return `true` if the given section for the given resource (if provided) is affected.
+     */
+    affectsConfiguration(section: string, resource?: Uri): boolean;
+}
+
+
 /**
  * Thenable is a common denominator between ES6 promises, Q, jquery.Deferred, WinJS.Promise,
  * and others. This API makes no assumption about what promise libary is being used which
@@ -900,10 +913,12 @@ export interface vscode {
         activeTextEditor: TextEditor | undefined;
         showInformationMessage: (message: string, ...items: string[]) => Thenable<string | undefined>;
         showWarningMessage: <T extends MessageItem>(message: string, ...items: T[]) => Thenable<T | undefined>;
+        showErrorMessage(message: string, ...items: string[]): Thenable<string | undefined>;
     };
     workspace: {
         getConfiguration: (section?: string, resource?: Uri) => WorkspaceConfiguration;
         asRelativePath: (pathOrUri: string | Uri, includeWorkspaceFolder?: boolean) => string;
         createFileSystemWatcher(globPattern: GlobPattern, ignoreCreateEvents?: boolean, ignoreChangeEvents?: boolean, ignoreDeleteEvents?: boolean): FileSystemWatcher;
+        onDidChangeConfiguration: Event<ConfigurationChangeEvent>;
     };
 }

@@ -5,7 +5,7 @@
 
 import * as vscode from '../../../src/vscodeAdapter';
 import * as protocol from '../../../src/omnisharp/protocol';
-import { DocumentSelector, MessageItem, TextDocument, Uri, GlobPattern } from '../../../src/vscodeAdapter';
+import { DocumentSelector, MessageItem, TextDocument, Uri, GlobPattern, ConfigurationChangeEvent, Disposable } from '../../../src/vscodeAdapter';
 import { ITelemetryReporter } from '../../../src/observers/TelemetryObserver';
 import { MSBuildDiagnosticsMessage } from '../../../src/omnisharp/protocol';
 import { OmnisharpServerMsBuildProjectDiagnostics, OmnisharpServerOnError, OmnisharpServerUnresolvedDependencies, WorkspaceInformationUpdated } from '../../../src/omnisharp/loggingEvents';
@@ -31,26 +31,9 @@ export const getNullTelemetryReporter = (): ITelemetryReporter => {
     return reporter;
 };
 
-export const getNullWorkspaceConfiguration = (): vscode.WorkspaceConfiguration => {
-    let configuration: vscode.WorkspaceConfiguration = {
-        get: <T>(section: string): T | undefined => {
-            return undefined;
-        },
-        has: (section: string) => { return undefined; },
-        inspect: () => {
-            return {
-                key: undefined
-            };
-        },
-        update: async () => { return Promise.resolve(); }
-    };
-
-    return configuration;
-};
-
 export const getWorkspaceConfiguration = (): vscode.WorkspaceConfiguration => {
     let values: { [key: string]: any } = {};
-    
+
     let configuration: vscode.WorkspaceConfiguration = {
         get<T>(section: string, defaultValue?: T): T | undefined {
             let result = <T>values[section];
@@ -132,6 +115,9 @@ export function getFakeVsCode(): vscode.vscode {
             },
             showWarningMessage: <T extends MessageItem>(message: string, ...items: T[]) => {
                 throw new Error("Not Implemented");
+            },
+            showErrorMessage: (message: string, ...items: string[]) => {
+                throw new Error("Not Implemented");
             }
         },
         workspace: {
@@ -142,6 +128,9 @@ export function getFakeVsCode(): vscode.vscode {
                 throw new Error("Not Implemented");
             },
             createFileSystemWatcher: (globPattern: GlobPattern, ignoreCreateEvents?: boolean, ignoreChangeEvents?: boolean, ignoreDeleteEvents?: boolean) => {
+                throw new Error("Not Implemented");
+            },
+            onDidChangeConfiguration: (listener: (e: ConfigurationChangeEvent) => any, thisArgs?: any, disposables?: Disposable[]): Disposable => {
                 throw new Error("Not Implemented");
             }
         }
@@ -162,3 +151,32 @@ export function getWorkspaceInformationUpdated(msbuild: protocol.MsBuildWorkspac
 
     return new WorkspaceInformationUpdated(a);
 } 
+
+export function getVSCodeWithConfig() {
+    const vscode = getFakeVsCode();
+
+    const _omnisharpConfig = getWorkspaceConfiguration();
+    const _csharpConfig = getWorkspaceConfiguration();
+
+    vscode.workspace.getConfiguration = (section?, resource?) =>
+    {
+        if (section === 'omnisharp')
+        {
+            return _omnisharpConfig;
+        }
+
+        if (section === 'csharp')
+        {
+            return _csharpConfig;
+        }
+
+        return undefined;
+    };
+
+    return vscode;
+}
+
+export function updateConfig(vscode: vscode.vscode, section: string, config: string, value: any) {
+    let workspaceConfig = vscode.workspace.getConfiguration(section);
+    workspaceConfig.update(config, value);
+}

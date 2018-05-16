@@ -36,12 +36,10 @@ export interface LaunchTarget {
  * (if it doesn't contain a `project.json` file, but `project.json` files exist). In addition, the root folder
  * is included if there are any `*.csproj` files present, but a `*.sln* file is not found.
  */
-export function findLaunchTargets(): Thenable<LaunchTarget[]> {
+export function findLaunchTargets(options: Options): Thenable<LaunchTarget[]> {
     if (!vscode.workspace.workspaceFolders) {
         return Promise.resolve([]);
     }
-
-    const options = Options.Read(vscode);
 
     return vscode.workspace.findFiles(
             /*include*/ '{**/*.sln,**/*.csproj,**/project.json,**/*.csx,**/*.cake}',
@@ -237,12 +235,12 @@ async function launch(cwd: string, args: string[], launchInfo: LaunchInfo, platf
     }
 
     let monoVersion = await getMonoVersion();
-    let isValidMonoAvailable = await satisfies(monoVersion, '>=5.2.0');
+    let isValidMonoAvailable = await satisfies(monoVersion, '>=5.8.1');
 
     // If the user specifically said that they wanted to launch on Mono, respect their wishes.
     if (options.useGlobalMono === "always") {
         if (!isValidMonoAvailable) {
-            throw new Error('Cannot start OmniSharp because Mono version >=5.2.0 is required.');
+            throw new Error('Cannot start OmniSharp because Mono version >=5.8.1 is required.');
         }
 
         const launchPath = launchInfo.MonoLaunchPath || launchInfo.LaunchPath;
