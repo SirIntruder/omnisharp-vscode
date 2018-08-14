@@ -13,7 +13,9 @@ import {CancellationToken, Uri, WorkspaceSymbolProvider, SymbolInformation, Symb
 export default class OmnisharpWorkspaceSymbolProvider extends AbstractSupport implements WorkspaceSymbolProvider {
 
     public async provideWorkspaceSymbols(search: string, token: CancellationToken): Promise<SymbolInformation[]> {
-
+        if (!search) {
+            return null;
+        }
         return serverUtils.findSymbols(this._server, { Filter: search, FileName: '' }, token).then(res => {
             if (res && Array.isArray(res.QuickFixes)) {
                 return res.QuickFixes.map(OmnisharpWorkspaceSymbolProvider._asSymbolInformation);
